@@ -232,6 +232,10 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
 
     private int mDisplayOrientation;
 
+    private int mDeviceOrientation;
+
+    private boolean mUseDeviceOrientation;
+
     private float mFocusDepth;
 
     private float mZoom;
@@ -610,11 +614,32 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
         return mIsScanning;
     }
 
+
+    @Override
+    boolean getUseDeviceOrientation() {
+        return mUseDeviceOrientation;
+    }
+
+    @Override
+    void setUseDeviceOrientation(boolean useDeviceOrientation) {
+        mUseDeviceOrientation = useDeviceOrientation;
+        // mPreview.setDisplayOrientation(mDisplayOrientation);
+    }
+
+
     @Override
     void setDisplayOrientation(int displayOrientation) {
         mDisplayOrientation = displayOrientation;
         mPreview.setDisplayOrientation(mDisplayOrientation);
     }
+
+    @Override
+    void setDeviceOrientation(int deviceOrientation) {
+        mDeviceOrientation = deviceOrientation;
+        // mPreview.setDisplayOrientation(mDisplayOrientation);
+    }
+
+
 
     /**
      * <p>Chooses a camera ID by the specified camera facing ({@link #mFacing}).</p>
@@ -1067,9 +1092,23 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
     private int getOutputRotation() {
         @SuppressWarnings("ConstantConditions")
         int sensorOrientation = mCameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-        return (sensorOrientation +
-                mDisplayOrientation * (mFacing == Constants.FACING_FRONT ? 1 : -1) +
-                360) % 360;
+
+
+        if (mCaptureCallback.getOptions().hasKey("useDeviceOrientation")) {
+            setUseDeviceOrientation(mCaptureCallback.getOptions().getBoolean("useDeviceOrientation"));
+        } else {
+            setUseDeviceOrientation(false);
+        }
+
+        if (mUseDeviceOrientation) {
+            return (sensorOrientation +
+                    mDeviceOrientation * (mFacing == Constants.FACING_FRONT ? 1 : -1) +
+                    360) % 360;
+        } else {
+            return (sensorOrientation +
+                    mDisplayOrientation * (mFacing == Constants.FACING_FRONT ? 1 : -1) +
+                    360) % 360;
+        }
     }
 
     private void setUpMediaRecorder(String path, int maxDuration, int maxFileSize, boolean recordAudio, CamcorderProfile profile) {

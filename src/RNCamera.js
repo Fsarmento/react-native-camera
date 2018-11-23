@@ -42,6 +42,7 @@ type PictureOptions = {
   fixOrientation?: boolean,
   forceUpOrientation?: boolean,
   pauseAfterCapture?: boolean,
+  useDeviceOrientation?: boolean,
 };
 
 type TrackedFaceFeature = FaceFeature & {
@@ -104,6 +105,7 @@ type PropsType = typeof View.props & {
   playSoundOnCapture?: boolean,
   videoStabilizationMode?: number | string,
   pictureSize?: string,
+  // useDeviceOrientation?: boolean,
 };
 
 type StateType = {
@@ -147,6 +149,7 @@ const CameraManager: Object = NativeModules.RNCameraManager ||
       BarcodeType: 0,
       BarcodeMode: 0,
     },
+    // UseDeviceOrientation: false,
   };
 
 const EventThrottleMs = 500;
@@ -177,6 +180,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     faceDetectionClassifications: (CameraManager.FaceDetection || {}).Classifications,
     googleVisionBarcodeType: (CameraManager.GoogleVisionBarcodeDetection || {}).BarcodeType,
     videoStabilizationMode: CameraManager.VideoStabilization || {},
+    // useDeviceOrientation: CameraManager.UseDeviceOrientation,
   };
 
   static propTypes = {
@@ -213,6 +217,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     pictureSize: PropTypes.string,
     mirrorVideo: PropTypes.bool,
     defaultVideoQuality: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    // useDeviceOrientation:  PropTypes.bool,
   };
 
   static defaultProps: Object = {
@@ -249,6 +254,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     pictureSize: 'None',
     videoStabilizationMode: 0,
     mirrorVideo: false,
+    // useDeviceOrientation: false,
   };
 
   _cameraRef: ?Object;
@@ -280,6 +286,10 @@ export default class Camera extends React.Component<PropsType, StateType> {
 
     if (options.pauseAfterCapture === undefined) {
       options.pauseAfterCapture = false;
+    }
+
+    if (options.useDeviceOrientation === undefined) {
+      options.useDeviceOrientation = false;
     }
 
     return await CameraManager.takePicture(options, this._cameraHandle);

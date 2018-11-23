@@ -119,8 +119,9 @@ public class CameraView extends FrameLayout {
         // Display orientation detector
         mDisplayOrientationDetector = new DisplayOrientationDetector(context) {
             @Override
-            public void onDisplayOrientationChanged(int displayOrientation) {
+            public void onDisplayOrientationChanged(int displayOrientation, int deviceOrientation) {
                 mImpl.setDisplayOrientation(displayOrientation);
+                mImpl.setDeviceOrientation(deviceOrientation);
             }
         };
     }
@@ -224,6 +225,7 @@ public class CameraView extends FrameLayout {
         state.whiteBalance = getWhiteBalance();
         state.scanning = getScanning();
         state.pictureSize = getPictureSize();
+        // state.useDeviceOrientation = getUseDeviceOrientation();
         return state;
     }
 
@@ -244,6 +246,7 @@ public class CameraView extends FrameLayout {
         setWhiteBalance(ss.whiteBalance);
         setScanning(ss.scanning);
         setPictureSize(ss.pictureSize);
+        // setUseDeviceOrientation(ss.useDeviceOrientation);
     }
 
     public void setUsingCamera2Api(boolean useCamera2) {
@@ -498,6 +501,10 @@ public class CameraView extends FrameLayout {
 
     public boolean getScanning() { return mImpl.getScanning(); }
 
+    public void setUseDeviceOrientation(boolean useDeviceOrientation) { mImpl.setUseDeviceOrientation(useDeviceOrientation);}
+
+    public boolean getUseDeviceOrientation() { return mImpl.getUseDeviceOrientation(); }
+
     /**
      * Take a picture. The result will be returned to
      * {@link Callback#onPictureTaken(CameraView, byte[])}.
@@ -629,6 +636,8 @@ public class CameraView extends FrameLayout {
         
         Size pictureSize;
 
+        // boolean useDeviceOrientation;
+
         @SuppressWarnings("WrongConstant")
         public SavedState(Parcel source, ClassLoader loader) {
             super(source);
@@ -641,6 +650,7 @@ public class CameraView extends FrameLayout {
             whiteBalance = source.readInt();
             scanning = source.readByte() != 0;
             pictureSize = source.readParcelable(loader);
+            // useDeviceOrientation = source.readByte() != 0;
         }
 
         public SavedState(Parcelable superState) {
